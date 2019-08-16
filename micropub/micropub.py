@@ -94,7 +94,9 @@ def extract_slug(entry):
 
 
 def extract_permalink(entry):
-    return app.config['WEBSITE_URL'] + entry.published_date.strftime('/%Y/%m/%d/') + extract_slug(entry)
+    return app.config['WEBSITE_URL'] + \
+           entry.published_date.strftime('/%Y/%m/%d/') + \
+           extract_slug(entry)
 
 
 def escape_commas(s):
@@ -129,7 +131,9 @@ def make_note(entry):
         f.write('\n')
         if entry.content:
             f.write(entry.content)
-        r = commit_file(github_commit_url('/content/notes/' + extract_slug(entry) + '.nd'), f.getvalue())
+        r = commit_file(github_commit_url('/content/notes/' +
+                                          extract_slug(entry) + '.nd'),
+                        f.getvalue())
         if r.status_code != 201:
             raise Exception('failed to post to github')
     permalink = extract_permalink(entry)
@@ -149,7 +153,9 @@ def make_article(entry):
 
         f.write('\n')
         f.write(entry.content)
-        r = commit_file(github_commit_url('/content/blog/' + extract_slug(entry) + '.md'), f.getvalue())
+        r = commit_file(github_commit_url('/content/blog/' +
+                                          extract_slug(entry) + '.md'),
+                        f.getvalue())
         if r.status_code != 201:
             raise Exception('failed to post to github')
     permalink = extract_permalink(entry)
@@ -161,7 +167,6 @@ def github_commit_url(path):
 
 
 def handle_query():
-    print('handle query')
     q = request.args.get('q')
     if q == 'config' or q == 'syndicate-to':
         filename = app.config['MICROPUB_CONFIG']
