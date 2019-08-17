@@ -7,11 +7,9 @@ from jsonschema import validate
 from flask import Response, Blueprint
 from flask import current_app as app
 from flask import request
-from flask import current_app
 from flask_indieauth import requires_indieauth
-from werkzeug.datastructures import MultiDict
-from mf2schema import mf2schema
-
+from micropub.mf2schema import mf2schema
+from micropub.utils import disable_if_testing
 
 micropub_bp = Blueprint('micropub_bp', __name__)
 
@@ -27,31 +25,31 @@ def handle_query():
         return Response(status=400)
 
 
-def make_create_request():
+def extract_create_request(json_data, form_data):
     """Return a decoded json object for a create request, or convert the web
     form data and return that.
     """
-    json_data = request.get_json()
     if json_data:
-        validate(json.loads(mf2schema), json_data)
+        validate(json_data, json.loads(mf2schema))
         return json_data
-    return form2json(request.form)
+    else:
+        return form2json(form_data)
 
 
 def form2json(form):
-    result = MultiDict()
+    result = {}
     htypes = extract_property(form, 'h')
     if htypes is None:
-        result['type'] = 'h-entry'
+        result['type'] = ['h-entry']
     else:
-        result['type'] = map(lambda t: 'h-' + t, htypes)
+        result['type'] = list(map(lambda t: 'h-' + t, htypes))
     result['properties'] = extract_object_properties(form)
     return result
 
 
 def extract_object_properties(form):
     result = {}
-    for k in filter(lambda k: k != 'h', map(lambda k: propname(k))):
+    for k in filter(lambda k: k != 'h', map(lambda k: propname(k), form)):
         result[k] = extract_property(form, k)
     return result
 
@@ -73,7 +71,7 @@ def extract_property(form, prop):
 
 
 def handle_create():
-    request_data = make_create_request()
+    request_data = extract_create_request(request)
     permalink = make_permalink(request_data)
     save_post(request_data)
     resp = Response(status=202)
@@ -101,7 +99,7 @@ def commit_file(url, content):
 
 
 @micropub_bp.route('/', methods=['GET', 'POST'], strict_slashes=False)
-@requires_indieauth
+@disable_if_testing(requires_indieauth)
 def handle_root():
     if request.method == 'GET':
         if 'q' in request.args:
@@ -116,6 +114,5 @@ def handle_root():
         else:
             return handle_create()
     else:
-        app.logger.error('HTTP method not supported: ' +
-                                 request.method)
+        app.logger.error('HTTP method not supported: ' + request.method)
         return Response(status=403)
