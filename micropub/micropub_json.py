@@ -2,6 +2,8 @@ import json
 import requests
 import os
 import base64
+import datetime
+import copy
 
 from jsonschema import validate
 from flask import Response, Blueprint
@@ -31,9 +33,11 @@ def extract_create_request(json_data, form_data):
     """
     if json_data:
         validate(json_data, json.loads(mf2schema))
-        return json_data
+        request_data = copy.deepcopy(json_data)
     else:
-        return form2json(form_data)
+        request_data = form2json(form_data)
+    fill_defaults(request_data)
+    return request_data
 
 
 def form2json(form):
@@ -70,6 +74,12 @@ def extract_property(form, prop):
         return None
 
 
+def fill_defaults(request_data):
+    if 'published' not in request_data['properties']:
+        request_data['properties']['published'] = \
+                    [datetime.datetime.now().isoformat()]
+
+
 def handle_create():
     request_data = extract_create_request(request)
     permalink = make_permalink(request_data)
@@ -84,7 +94,11 @@ def save_post(request_data):
 
 
 def make_permalink(request_data):
-    pass
+    props = request_data['properties']
+    published_date = datetime.datetime.strptime(props['published'][0],
+                                                '%Y-%m-%dT%H:%M:%S.%f')
+    return app.config['PERMALINK_FORMAT'].format(published=published_date,
+                                                 slug=props['mp_slug'][0])
 
 
 def b64(s):
