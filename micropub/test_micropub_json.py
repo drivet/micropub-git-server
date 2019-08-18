@@ -111,5 +111,3 @@ def test_h_entry_is_default_in_forms():
     assert result['type'] == ['h-entry']
     assert result['properties']['in-reply-to'] == ['some-post']
 
-    
-    

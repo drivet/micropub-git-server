@@ -81,7 +81,7 @@ def fill_defaults(request_data):
 
 
 def handle_create():
-    request_data = extract_create_request(request)
+    request_data = extract_create_request(request.get_json(), request.form)
     permalink = make_permalink(request_data)
     save_post(request_data)
     resp = Response(status=202)
@@ -90,15 +90,25 @@ def handle_create():
 
 
 def save_post(request_data):
-    pass
+    props = request_data['properties']
+    published_date = get_published_date(props)
+    repo_url_root = app.config['REPO_URL_ROOT']
+    repo_path = app.config['REPO_PATH_FORMAT'].format(published=published_date,
+                                                      slug=props['mp_slug'][0])
+    url = repo_url_root + repo_path
+    commit_file(url, json.dumps(request_data))
 
 
 def make_permalink(request_data):
     props = request_data['properties']
-    published_date = datetime.datetime.strptime(props['published'][0],
-                                                '%Y-%m-%dT%H:%M:%S.%f')
+    published_date = get_published_date(props)
     return app.config['PERMALINK_FORMAT'].format(published=published_date,
                                                  slug=props['mp_slug'][0])
+
+
+def get_published_date(props):
+    return datetime.datetime.strptime(props['published'][0],
+                                      '%Y-%m-%dT%H:%M:%S.%f')
 
 
 def b64(s):
@@ -119,7 +129,7 @@ def handle_root():
         if 'q' in request.args:
             return handle_query()
         else:
-            app.logger('GET only works for queries')
+            app.logger.error('GET only works for queries')
             return Response(status=400)
     elif request.method == 'POST':
         if 'action' in request.form:
@@ -129,4 +139,4 @@ def handle_root():
             return handle_create()
     else:
         app.logger.error('HTTP method not supported: ' + request.method)
-        return Response(status=403)
+        return Response(status=405)

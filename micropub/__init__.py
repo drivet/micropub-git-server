@@ -2,14 +2,15 @@ import os
 
 from flask import Flask
 from micropub.media import media_bp
-from micropub.micropub import micropub_bp
+from micropub.micropub_json import micropub_bp
 
 
 def get_root():
     if 'MICROPUB_ROOT' in os.environ:
         return os.environ['MICROPUB_ROOT']
     else:
-        return '../run'
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        return os.path.join(my_path, '../run')
 
 
 root = get_root()
