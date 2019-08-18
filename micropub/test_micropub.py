@@ -1,5 +1,5 @@
 from micropub import app
-from micropub.micropub_json import form2json, extract_create_request, \
+from micropub.micropub import form2json, extract_create_request, \
     make_permalink
 from werkzeug.datastructures import MultiDict
 
@@ -110,4 +110,3 @@ def test_h_entry_is_default_in_forms():
     result = form2json(form)
     assert result['type'] == ['h-entry']
     assert result['properties']['in-reply-to'] == ['some-post']
-

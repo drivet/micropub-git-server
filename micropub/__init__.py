@@ -2,7 +2,7 @@ import os
 
 from flask import Flask
 from micropub.media import media_bp
-from micropub.micropub_json import micropub_bp
+from micropub.micropub import micropub_bp
 
 
 def get_root():
