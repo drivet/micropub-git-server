@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 from micropub import app
 
 ctx = None
@@ -11,7 +12,11 @@ def setup_module():
     global client
     client = app.test_client()
     app.config['TESTING'] = True
-    app.config['PERMALINK_FORMAT'] = '{published:%Y}/{published:%m}/{published:%d}/{slug}'
+    datef = '{published:%Y}/{published:%m}/{published:%d}'
+    timef = '{published:%HH}{published:%MM}{published:%SS}'
+    app.config['PERMALINK_FORMAT'] = datef + '/{slug}'
+    app.config['REPO_URL_ROOT'] = 'https://api.guthub.com/drivet/pelican-test-blog'
+    app.config['REPO_PATH_FORMAT'] = datef + '/' + timef
 
 
 def test_get_fails_with_no_query():
@@ -39,7 +44,8 @@ def test_returns_config():
     assert len(json.loads(rv.data).keys()) > 0
 
 
-def test_returns_success():
+@patch('micropub.micropub.commit_file')
+def test_returns_success(commit_mock):
     rv = client.post('/', data={
         'content': 'hello',
         'mp_slug': 'blub'

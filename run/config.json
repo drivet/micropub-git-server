@@ -1,0 +1,13 @@
+{
+    "syndicate-to": [
+        {
+            "uid": "twitter_bridgy_no_link",
+            "name": "Twitter via Bridgy (no link)"
+        },
+        {
+            "uid": "twitter_bridgy",
+            "name": "Twitter via Bridgy (with link)"
+        }
+    ],
+    "media-endpoint": "https://desmondrivet.com/micropub/media"
+}
