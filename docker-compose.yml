@@ -1,6 +1,17 @@
-version: 3
+version: '3'
+
 services:
+
   micropub:
-    - studd
+    build: .
+    container_name: micropub
+    restart: always
+    expose:
+      - 3031
+
   nginx:
-    -hello
+    build: ./nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
