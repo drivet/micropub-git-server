@@ -9,7 +9,8 @@ from flask import current_app as app
 from flask_indieauth import requires_indieauth
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'PNG', 'JPG', 'JPEG', 'GIF'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'PNG', 'JPG', 'JPEG',
+                          'GIF'])
 IMAGE_SIZE = 1024
 
 media_bp = Blueprint('media_bp', __name__)

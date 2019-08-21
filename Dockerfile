@@ -1,14 +1,9 @@
-FROM python:3.6-slim
-
-RUN apt-get update && \
-    apt-get -y install build-essential && \
-    pip install uwsgi && \
-    apt-get purge -y build-essential && \
-    apt -y autoremove
+FROM tiangolo/uwsgi-nginx:python3.7
 
 WORKDIR /app
+
 ADD . /app
 
-RUN pip install -r requirements-prod.txt
+ENV MICROPUB_ROOT=/var/local/micropub
 
-CMD ["uwsgi", "app.ini"]
+RUN pip install -r requirements-prod.txt
