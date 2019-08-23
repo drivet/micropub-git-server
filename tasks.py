@@ -12,5 +12,16 @@ def test(c):
 
 
 @task
-def build(c):
-    c.run('docker image build -t micropub:0.1 .')
+def dlogin(c):
+    c.run('echo "$DOCKER_PASS" | ' +
+          'docker login --username $DOCKER_USER --password-stdin')
+
+
+@task
+def dbuild(c):
+    c.run('docker image build -t desmondrivet/micropub:$CIRCLE_BRANCH .')
+
+
+@task
+def dpush(c):
+    c.run('docker push desmondrivet/micropub:$CIRCLE_BRANCH')

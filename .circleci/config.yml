@@ -25,3 +25,21 @@ jobs:
           command: |
             . venv/bin/activate
             invoke test
+
+      - run:
+          name: login to docker hub
+          command: |
+            . venv/bin/activate
+            invoke dlogin
+            
+      - run:
+          name: build image
+          command: |
+            . venv/bin/activate
+            invoke dbuild
+
+      - run:
+          name: push image
+          command: |
+            . venv/bin/activate
+            invoke dpush
