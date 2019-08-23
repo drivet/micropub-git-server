@@ -19,9 +19,10 @@ def dlogin(c):
 
 @task
 def dbuild(c):
-    c.run('docker image build -t desmondrivet/micropub:$CIRCLE_BRANCH .')
+    c.run('docker image build -t ' +
+          'desmondrivet/micropub-git-server:$CIRCLE_BRANCH .')
 
 
 @task
 def dpush(c):
-    c.run('docker push desmondrivet/micropub:$CIRCLE_BRANCH')
+    c.run('docker push desmondrivet/micropub-git-server:$CIRCLE_BRANCH')
