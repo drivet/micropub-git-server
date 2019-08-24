@@ -20,7 +20,7 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install -r requirements-test.txt
+            pip install -r requirements-dev.txt
 
       - run:
           name: run tests
@@ -35,13 +35,20 @@ jobs:
             invoke dlogin
             
       - run:
-          name: build image
+          name: build docker image
           command: |
             . venv/bin/activate
             invoke dbuild
 
       - run:
-          name: push image
+          name: push docker image
           command: |
             . venv/bin/activate
             invoke dpush
+
+      - run:
+          name: deploy docker image to test server
+          command: |
+            . venv/bin/activate
+            fab deploytest
+            

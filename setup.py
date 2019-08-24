@@ -27,8 +27,8 @@ REQUIRED = [
 
 # What packages are optional?
 EXTRAS = {
-    'test': ['invoke', 'nose'],
-    'dev': ['invoke', 'nose', 'jedi', 'rope', 'flake8', 'autopep8', 'yapf', 'black']
+    'dev': ['invoke', 'fabric', 'nose',
+            'jedi', 'rope', 'flake8', 'autopep8', 'yapf', 'black']
 }
 
 # The rest you shouldn't have to touch too much :)
