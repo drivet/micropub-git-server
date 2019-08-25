@@ -75,9 +75,9 @@ def extract_property(form, prop):
 
 
 def fill_defaults(request_data):
+    date = datetime.datetime.now()
     if 'published' not in request_data['properties']:
-        request_data['properties']['published'] = \
-                    [datetime.datetime.now().isoformat()]
+        request_data['properties']['published'] = [date.isoformat()]
 
 
 def handle_create():
@@ -92,9 +92,10 @@ def handle_create():
 def save_post(request_data):
     props = request_data['properties']
     published_date = get_published_date(props)
+    slug = get_slug(props)
     repo_url_root = app.config['REPO_URL_ROOT']
     repo_path = app.config['REPO_PATH_FORMAT'].format(published=published_date,
-                                                      slug=props['mp_slug'][0])
+                                                      slug=slug)
     url = repo_url_root + repo_path
     commit_file(url, json.dumps(request_data))
 
@@ -102,8 +103,18 @@ def save_post(request_data):
 def make_permalink(request_data):
     props = request_data['properties']
     published_date = get_published_date(props)
+    slug = get_slug(props)
     return app.config['PERMALINK_FORMAT'].format(published=published_date,
-                                                 slug=props['mp_slug'][0])
+                                                 slug=slug)
+
+
+def get_slug(props):
+    return props.get('mp_slug', [get_default_slug(props)])[0]
+
+
+def get_default_slug(props):
+    date = get_published_date(props)
+    return '{published:%H}{published:%M}{published:%S}'.format(published=date)
 
 
 def get_published_date(props):

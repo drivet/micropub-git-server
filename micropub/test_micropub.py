@@ -91,6 +91,20 @@ def test_should_make_permalink():
         assert permalink == '2019/08/15/blub'
 
 
+def test_should_handle_missing_slug_in_permalink():
+    with app.app_context():
+        app.config['PERMALINK_FORMAT'] = \
+              '{published:%Y}/{published:%m}/{published:%d}/{slug}'
+        request_data = {
+            'type': 'h-entry',
+            'properties': {
+                'published': ['2019-08-15T14:16:34.6']
+            }
+        }
+        permalink = make_permalink(request_data)
+        assert permalink == '2019/08/15/141634'
+
+
 def test_form_converted_to_json():
     form = MultiDict()
     form.setlist('h[]', ['entry', 'review'])
