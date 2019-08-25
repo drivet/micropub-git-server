@@ -96,7 +96,9 @@ def save_post(request_data):
     repo_path = app.config['REPO_PATH_FORMAT'].format(published=published_date,
                                                       slug=slug)
     url = repo_url_root + repo_path
-    commit_file(url, json.dumps(request_data))
+    r = commit_file(url, json.dumps(request_data))
+    if r.status_code != 201:
+        raise Exception('failed to post to github: ' + url)
 
 
 def make_permalink(request_data):
