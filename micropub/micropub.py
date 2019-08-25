@@ -1,6 +1,5 @@
 import json
 import requests
-import os
 import base64
 import datetime
 import copy
@@ -127,8 +126,8 @@ def b64(s):
 
 
 def commit_file(url, content):
-    return requests.put(url, auth=(os.environ['USERNAME'],
-                                   os.environ['PASSWORD']),
+    return requests.put(url, auth=(app.config['GITHUB_USERNAME'],
+                                   app.config['GITHUB_PASSWORD']),
                         data=json.dumps({'message': 'post to ' + url,
                                          'content': b64(content)}))
 
