@@ -46,6 +46,12 @@ def test_returns_config():
 
 @patch('micropub.micropub.commit_file')
 def test_returns_success(commit_mock):
+    class Response:
+        pass
+    r = Response()
+    r.status_code = 201
+    commit_mock.return_value = r
+    
     rv = client.post('/', data={
         'content': 'hello',
         'mp_slug': 'blub',
