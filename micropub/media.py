@@ -31,12 +31,12 @@ def handle_media():
 
     if file and allowed_file(file.filename):
         filename = create_filename(secure_filename(file.filename))
-        print('saving file: ' + filename)
+        app.logger.info(f'saving {filename}')
         abs_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(abs_filename)
         outfile = make_image(app.config['UPLOAD_FOLDER'], filename)
         resp = Response(status=201)
-        location = app.config['WEBSITE_URL'] + '/media/' + outfile
+        location = app.config['ME'] + '/media/' + outfile
         resp.headers['Location'] = location
         return resp
 
@@ -60,4 +60,4 @@ def make_image(folder, filename):
         im.save(outfile, "JPEG")
         return '0_' + filename
     except IOError:
-        print("cannot create thumbnail for '%s'" % infile)
+        app.logger.error("cannot create thumbnail for '%s'" % infile)
