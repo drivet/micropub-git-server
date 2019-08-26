@@ -151,6 +151,7 @@ def handle_root():
             app.logger.error('GET only works for queries')
             return Response(status=400)
     elif request.method == 'POST':
+        app.logger.info('handling micropub root POST')
         if 'action' in request.form:
             app.logger.error('Actions other than create not supported')
             return Response(status=400)

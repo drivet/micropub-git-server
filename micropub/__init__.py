@@ -1,4 +1,5 @@
 import os
+import logging
 
 from flask import Flask
 from micropub.media import media_bp
@@ -20,3 +21,4 @@ app.config['UPLOAD_FOLDER'] = root + '/upload_folder'
 app.config['MICROPUB_CONFIG'] = root + '/config.json'
 app.register_blueprint(media_bp, url_prefix='/media')
 app.register_blueprint(micropub_bp, url_prefix='/')
+app.logger.setLevel(logging.INFO)

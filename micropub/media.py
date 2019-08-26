@@ -1,10 +1,10 @@
 import uuid
 import os
+import errno
+import datetime
 
 from PIL import Image
-from flask import Response
-from flask import request
-from flask import Blueprint
+from flask import Response, request, Blueprint, send_from_directory, url_for
 from flask import current_app as app
 from flask_indieauth import requires_indieauth
 from werkzeug.utils import secure_filename
@@ -16,9 +16,16 @@ IMAGE_SIZE = 1024
 media_bp = Blueprint('media_bp', __name__)
 
 
+@media_bp.route('/<path:imagepath>', methods=['GET'], strict_slashes=False)
+def handle_get(imagepath):
+    app.logger.info('Handling media GET with ' + imagepath)
+    return send_from_directory(app.config['UPLOAD_FOLDER'], imagepath)
+
+
 @media_bp.route('/', methods=['POST'], strict_slashes=False)
 @requires_indieauth
-def handle_media():
+def handle_post():
+    app.logger.info('Handling media POST')
     # check if the post request has the file part
     if 'file' not in request.files:
         return Response(response='no file part', status=400)
@@ -30,15 +37,27 @@ def handle_media():
         return Response(response='no selected file', status=400)
 
     if file and allowed_file(file.filename):
-        filename = create_filename(secure_filename(file.filename))
-        app.logger.info(f'saving {filename}')
-        abs_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(abs_filename)
-        outfile = make_image(app.config['UPLOAD_FOLDER'], filename)
+        image_file = create_filename(secure_filename(file.filename))
+        image_folder = make_image_folder()
+
+        save_image(file, image_folder, image_file)
+        outfile = resize_image(image_folder, image_file)
+        location = app.config['HOST'] + \
+            url_for('media_bp.handle_get', imagepath=outfile)
+        app.logger.info(f'Sending back location {location}')
+
         resp = Response(status=201)
-        location = app.config['ME'] + '/media/' + outfile
         resp.headers['Location'] = location
         return resp
+    else:
+        return Response(response='File isn\'t among allowed types', status=400)
+
+
+def make_image_folder():
+    now = datetime.datetime.now()
+    year = str(now.year)
+    month = now.month
+    return os.path.join(year, f'{month:02d}')
 
 
 def allowed_file(filename):
@@ -48,16 +67,39 @@ def allowed_file(filename):
 
 def create_filename(filename):
     base, ext = os.path.splitext(filename)
-    return str(uuid.uuid4()) + ext
+    return str(random()) + ext
 
 
-def make_image(folder, filename):
-    infile = os.path.join(folder, filename)
-    outfile = os.path.join(folder, '0_' + filename)
+def random():
+    return uuid.uuid4()
+
+
+def save_image(file, image_folder, image_file):
+    image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_folder)
+    ensure_folder(image_path)
+    abs_image_path = os.path.join(image_path, image_file)
+    app.logger.info(f'saving {abs_image_path}')
+    file.save(abs_image_path)
+
+
+def ensure_folder(path):
     try:
-        im = Image.open(infile)
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+def resize_image(image_folder, image_file):
+    infile = os.path.join(image_folder, image_file)
+    outfile = os.path.join(image_folder, '0_' + image_file)
+    try:
+        upload_folder = app.config['UPLOAD_FOLDER']
+        im = Image.open(os.path.join(upload_folder, infile))
         im.thumbnail((IMAGE_SIZE, IMAGE_SIZE), Image.ANTIALIAS)
-        im.save(outfile, "JPEG")
-        return '0_' + filename
+        im.save(os.path.join(upload_folder, outfile), "JPEG")
+        return outfile
     except IOError:
         app.logger.error("cannot create thumbnail for '%s'" % infile)
