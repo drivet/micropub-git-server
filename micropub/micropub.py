@@ -82,6 +82,13 @@ def fill_defaults(request_data):
 def handle_create():
     request_data = extract_create_request(request.get_json(), request.form)
     permalink = make_permalink(request_data)
+
+    # access token is passed along with the rest of the data,
+    # we don't want to save that
+    props = request_data['properties']
+    if 'access_token' in props:
+        del props['access_token']
+
     save_post(request_data)
     resp = Response(status=202)
     resp.headers['Location'] = permalink
