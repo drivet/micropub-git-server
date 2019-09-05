@@ -57,12 +57,12 @@ def test_returns_success(commit_mock):
     
     rv = client.post('/', data={
         'content': 'hello',
-        'mp_slug': 'blub',
+        'mp-slug': 'blub',
         'published': '2019-07-16T13:45:23.5'
     })
     assert rv.status_code == 202
     url = app.config['REPO_URL_ROOT'] + '/2019/07/16/134523.mpj'
-    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp_slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
+    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
     print(rv.headers['Location'])
     assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
@@ -78,13 +78,13 @@ def test_should_delete_access_token(commit_mock):
     
     rv = client.post('/', data={
         'content': 'hello',
-        'mp_slug': 'blub',
+        'mp-slug': 'blub',
         'published': '2019-07-16T13:45:23.5',
         'access_token': 'ZZZZSSSS'
     })
     assert rv.status_code == 202
     url = app.config['REPO_URL_ROOT'] + '/2019/07/16/134523.mpj'
-    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp_slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
+    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
     print(rv.headers['Location'])
     assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
@@ -169,11 +169,12 @@ def test_should_make_permalink():
         request_data = {
             'type': 'h-entry',
             'properties': {
-                'mp_slug': ['blub'],
+                'mp-slug': ['blub'],
                 'published': ['2019-08-15T14:16:34.6']
             }
         }
         permalink = make_permalink(request_data)
+        print(permalink)
         assert permalink == '2019/08/15/blub'
 
 
