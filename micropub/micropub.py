@@ -117,7 +117,7 @@ def make_permalink(request_data):
 
 
 def get_slug(props):
-    return props.get('mp_slug', [get_default_slug(props)])[0]
+    return props.get('mp-slug', [get_default_slug(props)])[0]
 
 
 def get_default_slug(props):

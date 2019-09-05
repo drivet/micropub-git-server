@@ -44,7 +44,7 @@ mf2schema = """{
                 "html": { "type": "string" },
                 "value": { "type": "string" }
             },
-            "required": ["html", "value"],
+            "required": ["html"],
             "additionalProperties": false
         },
         "complexproperty": {
