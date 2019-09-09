@@ -1,6 +1,6 @@
 # Micropub Listener for Git Repositories
 
-A small Flask application which listens for micropub create requests
+A small Flask application which listens for [micropub][0] create requests
 and commits the result in a git repository.
 
 This server will commit plain, minimally processed JSON files,
@@ -25,3 +25,8 @@ content include:
 
 Please consult the [wiki][3] for information on the IndieWeb and how to
 join.
+
+[0]: https://www.w3.org/TR/micropub/
+[2]: https://indieweb.org/IndieWeb
+[3]: https://indieweb.org
+[4]: http://microformats.org/
