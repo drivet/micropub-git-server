@@ -1,3 +1,4 @@
+import os
 import json
 from unittest.mock import patch
 from micropub import app
@@ -17,9 +18,10 @@ def setup_module():
     app.config['TESTING'] = True
     datef = '{published:%Y}/{published:%m}/{published:%d}'
     timef = '{published:%H}{published:%M}{published:%S}'
-    app.config['PERMALINK_FORMAT'] = datef + '/{slug}'
-    app.config['REPO_URL_ROOT'] = 'https://api.guthub.com/drivet/pelican-test-blog'
-    app.config['REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
+    os.environ['PERMALINK_FORMAT'] = datef + '/{slug}'
+    os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
+    os.environ['REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
+    os.environ['HOST'] = 'https://micropubtest.desmondrivet.com'
 
 
 def test_get_fails_with_no_query():
@@ -54,17 +56,16 @@ def test_returns_success(commit_mock):
     r = Response()
     r.status_code = 201
     commit_mock.return_value = r
-    
+
     rv = client.post('/', data={
         'content': 'hello',
         'mp-slug': 'blub',
         'published': '2019-07-16T13:45:23.5'
     })
     assert rv.status_code == 202
-    url = app.config['REPO_URL_ROOT'] + '/2019/07/16/134523.mpj'
+    url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
     contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
-    print(rv.headers['Location'])
     assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
 
 
@@ -83,10 +84,9 @@ def test_should_delete_access_token(commit_mock):
         'access_token': 'ZZZZSSSS'
     })
     assert rv.status_code == 202
-    url = app.config['REPO_URL_ROOT'] + '/2019/07/16/134523.mpj'
+    url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
     contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
-    print(rv.headers['Location'])
     assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
 
 

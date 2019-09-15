@@ -12,15 +12,15 @@ def test(c):
 
 
 @task
-def dlogin(c):
-    c.run('echo "$DOCKER_PASS" | ' +
-          'docker login --username $DOCKER_USER --password-stdin')
-
-
-@task
 def dbuild(c):
     c.run('docker image build -t ' +
           'desmondrivet/micropub-git-server:$CIRCLE_BRANCH .')
+
+
+@task
+def dlogin(c):
+    c.run('echo "$DOCKER_PASS" | ' +
+          'docker login --username $DOCKER_USER --password-stdin')
 
 
 @task
