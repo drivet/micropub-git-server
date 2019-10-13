@@ -151,7 +151,8 @@ def get_repo_api_root():
 
 
 def get_repo_path_format():
-    default = '/content/{published:%Y}/{published:%m}/{published:%d}/' + \
+    default = '/content/micropub/' + \
+              '{published:%Y}/{published:%m}/{published:%d}/' + \
               '{published:%H}{published:%M}{published:%S}.mp'
     return os.environ.get('REPO_PATH_FORMAT', default)
 
