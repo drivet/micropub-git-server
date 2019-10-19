@@ -38,7 +38,7 @@ def docker_env_params():
     return ' '.join([f'-e {e}' for e in env])
 
 
-@task(hosts=["dcr@desmondrivet.com"])
+@task(hosts=["dcr@micropub.desmondrivet.com"])
 def deploy(c):
     c.run(f'docker pull {image}')
     c.run(f'docker stop {name}', warn=True)
