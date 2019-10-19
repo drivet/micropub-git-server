@@ -1,16 +1,29 @@
 import os
 from fabric import task
 
-image = 'desmondrivet/micropub-git-server:master'
-testvolume = 'mp-root-test'
-volume = 'mp-root'
+branch = os.environ['CIRCLE_BRANCH']
+
+if branch == 'master':
+    port = 3132
+else:
+    port = 3131
+
+os.environ['PORT'] = f'{port}'
+
+if branch == 'master':
+    volume = 'mp-root'
+else:
+    volume = 'mp-root-test'
+
+
+image = 'desmondrivet/micropub-git-server:{branch}'
 name = 'micropub-git-server'
-testport = 3031
-port = 3032
 
 
 env = ['ME', 'TOKEN_ENDPOINT', 'GITHUB_REPO',
        'GITHUB_USERNAME', 'GITHUB_PASSWORD', 'HOST']
+
+extra = ['CIRCLE_BRANCH', 'PORT']
 
 
 def all_env_cmd():
@@ -26,19 +39,10 @@ def docker_env_params():
 
 
 @task(hosts=["dcr@desmondrivet.com"])
-def deploytest(c):
+def deploy(c):
     c.run(f'docker pull {image}')
     c.run(f'docker stop {name}', warn=True)
     c.run(f'{all_env_cmd()} && docker run --name {name} ' +
           f'{docker_env_params()} ' +
-          f'-p {testport}:3031 ' +
-          f'-v {testvolume}:/data --rm -d {image}')
-
-
-@task
-def deploy(c):
-    c.run(f'docker pull {image}')
-    c.run(f'docker stop {name}', warn=True)
-    c.run(f'docker run --name {name} ' +
           f'-p {port}:3031 ' +
           f'-v {volume}:/data --rm -d {image}')
