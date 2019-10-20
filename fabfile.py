@@ -4,9 +4,9 @@ from fabric import task
 branch = os.environ['CIRCLE_BRANCH']
 
 if branch == 'master':
-    port = 3132
+    port = 3032
 else:
-    port = 3131
+    port = 3031
 
 os.environ['PORT'] = f'{port}'
 
