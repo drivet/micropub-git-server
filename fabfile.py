@@ -16,14 +16,12 @@ else:
     volume = 'mp-root-test'
 
 
-image = 'desmondrivet/micropub-git-server:{branch}'
+image = f'desmondrivet/micropub-git-server:{branch}'
 name = 'micropub-git-server'
 
 
 env = ['ME', 'TOKEN_ENDPOINT', 'GITHUB_REPO',
        'GITHUB_USERNAME', 'GITHUB_PASSWORD', 'HOST']
-
-extra = ['CIRCLE_BRANCH', 'PORT']
 
 
 def all_env_cmd():
