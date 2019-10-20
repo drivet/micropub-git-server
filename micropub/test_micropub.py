@@ -41,7 +41,7 @@ def test_only_get_and_post_supported():
     assert rv.status_code == 405
 
 
-def test_returns_empty_config():
+def xtest_returns_empty_config():
     rv = client.get('/?q=config')
     assert rv.status_code == 200
     assert len(rv.data) > 0
@@ -49,14 +49,14 @@ def test_returns_empty_config():
     assert rv.data == b"{}"
 
 
-def test_returns_empty_syndicate_targets():
+def xtest_returns_empty_syndicate_targets():
     rv = client.get('/?q=syndicate-to')
     assert rv.status_code == 200
     assert len(rv.data) > 0
     assert rv.data == b"[]"
 
 
-def test_returns_media_endpoint():
+def xtest_returns_media_endpoint():
     os.environ['MICROPUB_MEDIA_ENDPOINT'] = 'https://media.example.com'
     rv = client.get('/?q=config')
     assert rv.status_code == 200
@@ -66,7 +66,7 @@ def test_returns_media_endpoint():
     assert jdict['media-endpoint'] == 'https://media.example.com'
 
 
-def test_returns_syndicate_targets():
+def xtest_returns_syndicate_targets():
     os.environ['MICROPUB_SYNDICATE_TO'] = \
         '[{"uid": "twitter", "name": "Twitter"}]'
     rv = client.get('/?q=syndicate-to')
