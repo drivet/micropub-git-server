@@ -21,7 +21,7 @@ name = 'micropub-git-server'
 
 
 env = ['ME', 'TOKEN_ENDPOINT', 'GITHUB_REPO',
-       'GITHUB_USERNAME', 'GITHUB_PASSWORD', 'HOST']
+       'GITHUB_USERNAME', 'GITHUB_PASSWORD']
 
 
 def all_env_cmd():
