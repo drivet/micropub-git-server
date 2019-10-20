@@ -18,9 +18,9 @@ def setup_module():
     app.config['TESTING'] = True
     datef = '{published:%Y}/{published:%m}/{published:%d}'
     timef = '{published:%H}{published:%M}{published:%S}'
-    os.environ['PERMALINK_FORMAT'] = datef + '/{slug}'
+    os.environ['MICROPUB_PERMALINK_FORMAT'] = datef + '/{slug}'
     os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
-    os.environ['REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
+    os.environ['MICROPUB_REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
 
 
 def test_get_fails_with_no_query():
