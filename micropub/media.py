@@ -4,11 +4,10 @@ import errno
 import datetime
 
 from PIL import Image
-from flask import Response, request, Blueprint, send_from_directory, url_for
+from flask import Response, request, Blueprint, send_from_directory
 from flask import current_app as app
 from flask_indieauth import requires_indieauth
 from werkzeug.utils import secure_filename
-from micropub.utils import get_root
 
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif', 'PNG', 'JPG', 'JPEG',
@@ -44,8 +43,7 @@ def handle_post():
 
         save_image(file, image_folder, image_file)
         outfile = resize_image(image_folder, image_file)
-        location = os.environ['HOST'] + \
-            url_for('media_bp.handle_get', imagepath=outfile)
+        location = os.path.join(os.environ['MICROPUB_MEDIA_ENDPOINT'], outfile)
         app.logger.info(f'Sending back location {location}')
 
         resp = Response(status=201)
@@ -82,6 +80,10 @@ def save_image(file, image_folder, image_file):
     abs_image_path = os.path.join(image_path, image_file)
     app.logger.info(f'saving {abs_image_path}')
     file.save(abs_image_path)
+
+
+def get_root():
+    return os.environ.get('MICROPUB_ROOT', '/data')
 
 
 def get_upload_folder():

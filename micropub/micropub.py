@@ -11,13 +11,27 @@ from flask import current_app as app
 from flask import request
 from flask_indieauth import requires_indieauth
 from micropub.mf2schema import mf2schema
-from micropub.utils import disable_if_testing, get_root
+from micropub.utils import disable_if_testing
 
-DEFAULT_CONFIG = '''{{
-    "syndicate-to": [],
-    "media-endpoint": "{host}/media"
+
+FULL_CONFIG_TEMPLATE = '''{{
+    "syndicate-to": {syndicate_to},
+    "media-endpoint": "{media_endpoint}"
 }}
 '''
+
+
+SYNDICATE_CONFIG_TEMPLATE = '''{{
+    "syndicate-to": {syndicate_to}
+}}
+'''
+
+
+MEDIA_CONFIG_TEMPLATE = '''{{
+    "media-endpoint": "{media_endpoint}"
+}}
+'''
+
 
 micropub_bp = Blueprint('micropub_bp', __name__)
 
@@ -45,23 +59,26 @@ def handle_root():
 
 def handle_query():
     q = request.args.get('q')
-    if q == 'config' or q == 'syndicate-to':
-        filename = config_file()
-        try:
-            with open(filename) as f:
-                return f.read()
-        except (FileNotFoundError, IOError):
-            app.logger.info(f'Could not open {filename}, ' +
-                            'sending default config')
-            host = os.environ['HOST']
-            return DEFAULT_CONFIG.format(host=host)
+    media_endpoint = os.environ.get('MICROPUB_MEDIA_ENDPOINT', None)
+    syndicate_to = os.environ.get('MICROPUB_SYNDICATE_TO', None)
+    if q == 'config':
+        if not media_endpoint and not syndicate_to:
+            return "{}"
+        elif media_endpoint and not syndicate_to:
+            return MEDIA_CONFIG_TEMPLATE.format(media_endpoint=media_endpoint)
+        elif not media_endpoint and syndicate_to:
+            return SYNDICATE_CONFIG_TEMPLATE.format(syndicate_to=syndicate_to)
+        else:
+            return FULL_CONFIG_TEMPLATE.format(media_endpoint=media_endpoint,
+                                               syndicate_to=syndicate_to)
+    elif q == 'syndicate-to':
+        if not syndicate_to:
+            return "[]"
+        else:
+            return SYNDICATE_CONFIG_TEMPLATE.format(syndicate_to=syndicate_to)
     else:
         app.logger.error(f'Unsupported q value: {q}')
         return Response(status=400)
-
-
-def config_file():
-    return get_root() + '/config.json'
 
 
 def extract_create_request(json_data, form_data):

@@ -21,7 +21,6 @@ def setup_module():
     os.environ['PERMALINK_FORMAT'] = datef + '/{slug}'
     os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
     os.environ['REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
-    os.environ['HOST'] = 'https://micropubtest.desmondrivet.com'
 
 
 def test_get_fails_with_no_query():
@@ -42,11 +41,58 @@ def test_only_get_and_post_supported():
     assert rv.status_code == 405
 
 
-def test_returns_config():
+def test_returns_empty_config():
     rv = client.get('/?q=config')
     assert rv.status_code == 200
     assert len(rv.data) > 0
-    assert len(json.loads(rv.data).keys()) > 0
+    assert rv.data == b"{}"
+
+
+def test_returns_empty_syndicate_targets():
+    rv = client.get('/?q=syndicate-to')
+    assert rv.status_code == 200
+    assert len(rv.data) > 0
+    assert rv.data == b"[]"
+
+
+def test_returns_media_endpoint():
+    os.environ['MICROPUB_MEDIA_ENDPOINT'] = 'https://media.example.com'
+    rv = client.get('/?q=config')
+    assert rv.status_code == 200
+    assert len(rv.data) > 0
+    jdict = json.loads(rv.data)
+    assert len(jdict) == 1
+    assert jdict['media-endpoint'] == 'https://media.example.com'
+
+
+def test_returns_syndicate_targets():
+    os.environ['MICROPUB_SYNDICATE_TO'] = \
+        '[{"uid": "twitter", "name": "Twitter"}]'
+    rv = client.get('/?q=syndicate-to')
+    assert rv.status_code == 200
+    assert len(rv.data) > 0
+    jdict = json.loads(rv.data)
+    assert len(jdict) == 1
+    targets = jdict['syndicate-to']
+    assert len(targets) == 1
+    assert targets[0]['uid'] == 'twitter'
+    assert targets[0]['name'] == 'Twitter'
+
+
+def test_returns_all_config():
+    os.environ['MICROPUB_SYNDICATE_TO'] = \
+        '[{"uid": "twitter", "name": "Twitter"}]'
+    os.environ['MICROPUB_MEDIA_ENDPOINT'] = 'https://media.example.com'
+    rv = client.get('/?q=config')
+    assert rv.status_code == 200
+    assert len(rv.data) > 0
+    jdict = json.loads(rv.data)
+    assert len(jdict) == 2
+    assert jdict['media-endpoint'] == 'https://media.example.com'
+    targets = jdict['syndicate-to']
+    assert len(targets) == 1
+    assert targets[0]['uid'] == 'twitter'
+    assert targets[0]['name'] == 'Twitter'
 
 
 @patch('micropub.micropub.commit_file')

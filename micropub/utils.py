@@ -1,4 +1,3 @@
-import os
 import functools
 from flask import current_app as app
 
@@ -13,7 +12,3 @@ def disable_if_testing(decorator):
                 return decorator(func)(*args, **kwargs)
         return wrapper_dit
     return decorator_dit
-
-
-def get_root():
-    return os.environ.get('MICROPUB_ROOT', '/data')
