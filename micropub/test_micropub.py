@@ -45,6 +45,7 @@ def test_returns_empty_config():
     rv = client.get('/?q=config')
     assert rv.status_code == 200
     assert len(rv.data) > 0
+    print(rv.data)
     assert rv.data == b"{}"
 
 
