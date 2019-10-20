@@ -20,12 +20,13 @@ image = f'desmondrivet/micropub-git-server:{branch}'
 name = 'micropub-git-server'
 
 
-env = ['ME', 'TOKEN_ENDPOINT', 'GITHUB_REPO',
-       'GITHUB_USERNAME', 'GITHUB_PASSWORD']
+env = ['ME', 'TOKEN_ENDPOINT', 'GITHUB_REPO', 'GITHUB_USERNAME',
+       'GITHUB_PASSWORD', 'MICROPUB_MEDIA_ENDPOINT', 'MICROPUB_SYNDICATE_TO',
+       'MICROPUB_REPO_PATH_FORMAT', 'MICROPUB_PERMALINK_FORMAT']
 
 
 def all_env_cmd():
-    return ' && '.join([env_cmd(e) for e in env])
+    return ' && '.join([env_cmd(e) for e in env if e in os.environ])
 
 
 def env_cmd(e):

@@ -171,7 +171,7 @@ def get_repo_path_format():
     default = '/content/micropub/' + \
               '{published:%Y}/{published:%m}/{published:%d}/' + \
               '{published:%H}{published:%M}{published:%S}.mp'
-    return os.environ.get('REPO_PATH_FORMAT', default)
+    return os.environ.get('MICROPUB_REPO_PATH_FORMAT', default)
 
 
 def make_permalink(request_data):
@@ -183,7 +183,7 @@ def make_permalink(request_data):
 
 def get_permalink_format():
     default = '{published:%Y}/{published:%m}/{published:%d}/{slug}'
-    return os.environ.get('PERMALINK_FORMAT', default)
+    return os.environ.get('MICROPUB_PERMALINK_FORMAT', default)
 
 
 def get_slug(props):
