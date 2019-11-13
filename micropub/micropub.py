@@ -12,6 +12,9 @@ from flask import request
 from flask_indieauth import requires_indieauth
 from micropub.mf2schema import mf2schema
 from micropub.utils import disable_if_testing
+from indieweb_utils.notedown import extract_links
+from indieweb_utils.unfurl import PreviewGenerator
+from indieweb_utils.commit import commit
 
 
 FULL_CONFIG_TEMPLATE = '''{{
@@ -34,6 +37,8 @@ MEDIA_CONFIG_TEMPLATE = '''{{
 
 
 micropub_bp = Blueprint('micropub_bp', __name__)
+
+preview_generator = None
 
 
 @micropub_bp.route('/', methods=['GET', 'POST'], strict_slashes=False)
@@ -136,7 +141,7 @@ def fill_defaults(request_data):
 
 def handle_create():
     request_data = extract_create_request(request.get_json(), request.form)
-    permalink = make_permalink(request_data)
+    permalink = os.path.join(app.config['ME'], make_permalink(request_data))
 
     # access token is passed along with the rest of the data,
     # we don't want to save that
@@ -156,15 +161,60 @@ def save_post(request_data):
     slug = get_slug(props)
     repo_path = get_repo_path_format().format(published=published_date,
                                               slug=slug)
-    url = get_repo_api_root() + repo_path
-    r = commit_file(url, json.dumps(request_data))
+    files = {repo_path: json.dumps(request_data)}
+
+    if is_preview_enabled():
+        preview = unfurl_post(request_data)
+        if preview:
+            path_format = get_preview_path_format()
+            preview_path = path_format.format(published=published_date,
+                                              slug=slug)
+            files[preview_path] = preview
+
+    auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
+    r = commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
+
     if r.status_code != 201:
-        raise Exception('failed to post to github: ' + url)
+        raise Exception(f'failed to post to github: {files}')
 
 
-def get_repo_api_root():
-    repo = os.environ['GITHUB_REPO']
-    return f'https://api.github.com/repos/{repo}/contents'
+def unfurl_post(request_data):
+    preview_url = get_preview_url(request_data)
+    if not preview_url:
+        return None
+
+    global preview_generator
+    if not preview_generator:
+        preview_generator = PreviewGenerator()
+        preview_generator.initialize()
+    return preview_generator.preview(preview_url)
+
+
+def get_preview_url(post):
+    props = post['properties']
+    if 'like-of' in props:
+        return props['like-of'][0]
+
+    if 'in-reply-to' in props:
+        return props['in-reply-to'][0]
+
+    if 'repost-of' in props:
+        return props['repost-of'][0]
+
+    links = extract_links(post.properties['content'])
+    if links:
+        return links[0]
+
+    return None
+
+
+def is_preview_enabled():
+    return os.environ.get('MICROPUB_PREVIEW_ENABLED', False)
+
+
+def get_preview_path_format():
+    default = '/previews/{published:%Y}/{published:%m}/{published:%d}/{slug}'
+    return os.environ.get('MICROPUB_PREVIEW_PATH_FORMAT', default)
 
 
 def get_repo_path_format():

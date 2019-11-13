@@ -16,11 +16,13 @@ def setup_module():
     global client
     client = app.test_client()
     app.config['TESTING'] = True
+    app.config['ME'] = 'https://mysite.com'
     datef = '{published:%Y}/{published:%m}/{published:%d}'
     timef = '{published:%H}{published:%M}{published:%S}'
     os.environ['MICROPUB_PERMALINK_FORMAT'] = datef + '/{slug}'
     os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
-    os.environ['MICROPUB_REPO_PATH_FORMAT'] = '/' + datef + '/' + timef + '.mpj'
+    os.environ['MICROPUB_REPO_PATH_FORMAT'] = \
+        '/' + datef + '/' + timef + '.mpj'
 
 
 def test_get_fails_with_no_query():
@@ -113,7 +115,7 @@ def test_returns_success(commit_mock):
     url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
     contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
-    assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
+    assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
 
 
 @patch('micropub.micropub.commit_file')
@@ -134,7 +136,7 @@ def test_should_delete_access_token(commit_mock):
     url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
     contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
     commit_mock.assert_called_with(url, contents)
-    assert rv.headers['Location'] == 'http://localhost/2019/07/16/blub'
+    assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
 
 
 def test_badly_formatted_json_throws():
