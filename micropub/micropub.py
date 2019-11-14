@@ -201,7 +201,7 @@ def get_preview_url(post):
     if 'repost-of' in props:
         return props['repost-of'][0]
 
-    links = extract_links(post.properties['content'])
+    links = extract_links(post['properties']['content'][0])
     if links:
         return links[0]
 
@@ -209,7 +209,7 @@ def get_preview_url(post):
 
 
 def is_preview_enabled():
-    return os.environ.get('MICROPUB_PREVIEW_ENABLED', False)
+    return os.environ.get('MICROPUB_PREVIEW_ENABLED', '')
 
 
 def get_preview_path_format():
