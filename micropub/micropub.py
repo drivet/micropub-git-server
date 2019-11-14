@@ -248,11 +248,3 @@ def get_default_slug(props):
 def get_published_date(props):
     return datetime.datetime.strptime(props['published'][0],
                                       '%Y-%m-%dT%H:%M:%S.%f')
-
-
-def commit_file(url, content):
-    c = base64.b64encode(content.encode()).decode()
-    return requests.put(url, auth=(os.environ['GITHUB_USERNAME'],
-                                   os.environ['GITHUB_PASSWORD']),
-                        data=json.dumps({'message': 'post to ' + url,
-                                         'content': c}))

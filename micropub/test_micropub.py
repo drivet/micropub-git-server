@@ -19,6 +19,8 @@ def setup_module():
     app.config['ME'] = 'https://mysite.com'
     datef = '{published:%Y}/{published:%m}/{published:%d}'
     timef = '{published:%H}{published:%M}{published:%S}'
+    os.environ['GITHUB_USERNAME'] = 'dude'
+    os.environ['GITHUB_PASSWORD'] = 'amazing_password'
     os.environ['MICROPUB_PERMALINK_FORMAT'] = datef + '/{slug}'
     os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
     os.environ['MICROPUB_REPO_PATH_FORMAT'] = \
@@ -43,7 +45,7 @@ def test_only_get_and_post_supported():
     assert rv.status_code == 405
 
 
-def xtest_returns_empty_config():
+def test_returns_empty_config():
     rv = client.get('/?q=config')
     assert rv.status_code == 200
     assert len(rv.data) > 0
@@ -51,14 +53,14 @@ def xtest_returns_empty_config():
     assert rv.data == b"{}"
 
 
-def xtest_returns_empty_syndicate_targets():
+def test_returns_empty_syndicate_targets():
     rv = client.get('/?q=syndicate-to')
     assert rv.status_code == 200
     assert len(rv.data) > 0
     assert rv.data == b"[]"
 
 
-def xtest_returns_media_endpoint():
+def test_returns_media_endpoint():
     os.environ['MICROPUB_MEDIA_ENDPOINT'] = 'https://media.example.com'
     rv = client.get('/?q=config')
     assert rv.status_code == 200
@@ -68,7 +70,7 @@ def xtest_returns_media_endpoint():
     assert jdict['media-endpoint'] == 'https://media.example.com'
 
 
-def xtest_returns_syndicate_targets():
+def test_returns_syndicate_targets():
     os.environ['MICROPUB_SYNDICATE_TO'] = \
         '[{"uid": "twitter", "name": "Twitter"}]'
     rv = client.get('/?q=syndicate-to')
@@ -98,7 +100,7 @@ def test_returns_all_config():
     assert targets[0]['name'] == 'Twitter'
 
 
-@patch('micropub.micropub.commit_file')
+@patch('micropub.micropub.commit')
 def test_returns_success(commit_mock):
     class Response:
         pass
@@ -112,20 +114,21 @@ def test_returns_success(commit_mock):
         'published': '2019-07-16T13:45:23.5'
     })
     assert rv.status_code == 202
-    url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
-    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
-    commit_mock.assert_called_with(url, contents)
+    files = {'/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'}
+    commit_mock.assert_called_with('drivet/pelican-test-blog',
+                                   ('dude', 'amazing_password'),
+                                   files, 'new post')
     assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
 
 
-@patch('micropub.micropub.commit_file')
+@patch('micropub.micropub.commit')
 def test_should_delete_access_token(commit_mock):
     class Response:
         pass
     r = Response()
     r.status_code = 201
     commit_mock.return_value = r
-    
+
     rv = client.post('/', data={
         'content': 'hello',
         'mp-slug': 'blub',
@@ -133,9 +136,10 @@ def test_should_delete_access_token(commit_mock):
         'access_token': 'ZZZZSSSS'
     })
     assert rv.status_code == 202
-    url = 'https://api.github.com/repos/drivet/pelican-test-blog/contents/2019/07/16/134523.mpj'
-    contents = '{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'
-    commit_mock.assert_called_with(url, contents)
+    files = {'/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'}
+    commit_mock.assert_called_with('drivet/pelican-test-blog',
+                                   ('dude', 'amazing_password'),
+                                   files, 'new post')
     assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
 
 
