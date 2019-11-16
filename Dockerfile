@@ -1,6 +1,7 @@
 FROM python:3.6-slim
 
 RUN apt-get update && \
+    apt-get -y install git && \
     apt-get -y install build-essential && \
     pip install uwsgi && \
     apt-get purge -y build-essential && \
