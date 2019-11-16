@@ -182,12 +182,15 @@ def unfurl_post(request_data):
     preview_url = get_preview_url(request_data)
     if not preview_url:
         return None
+    return generate_preview(preview_url)
 
+
+def generate_preview(url):
     global preview_generator
     if not preview_generator:
         preview_generator = PreviewGenerator()
         preview_generator.initialize()
-    return preview_generator.preview(preview_url)
+    return preview_generator.preview(url)
 
 
 def get_preview_url(post):

@@ -175,6 +175,36 @@ def test_does_not_unfurl_if_no_url(commit_mock):
     assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
 
 
+@patch('micropub.micropub.generate_preview')
+@patch('micropub.micropub.commit')
+@with_setup(preview_on, preview_off)
+def test_saves_unfurled_url(commit_mock, generate_preview_mock):
+    class Response:
+        pass
+    r = Response()
+    r.status_code = 201
+    commit_mock.return_value = r
+
+    unfurled_content = 'this_is_the_unfurled_url'
+    generate_preview_mock.return_value = unfurled_content
+
+    rv = client.post('/', data={
+        'like-of': 'https://cool-uri.com/stuff.html',
+        'content': 'hello',
+        'mp-slug': 'blub',
+        'published': '2019-07-16T13:45:23.5'
+    })
+    assert rv.status_code == 202
+    files = {
+        '/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"like-of": ["https://cool-uri.com/stuff.html"], "content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}',
+        '/previews/2019/07/16/blub': unfurled_content
+    }
+    commit_mock.assert_called_with('drivet/pelican-test-blog',
+                                   ('dude', 'amazing_password'),
+                                   files, 'new post')
+    assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
+
+
 def test_badly_formatted_json_throws():
     try:
         extract_create_request('this is not good json', None)
