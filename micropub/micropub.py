@@ -154,6 +154,7 @@ def handle_create():
 
 
 def save_post(request_data):
+    app.logger.info('saving post...')
     props = request_data['properties']
     published_date = get_published_date(props)
     slug = get_slug(props)
@@ -162,12 +163,17 @@ def save_post(request_data):
     files = {repo_path: json.dumps(request_data)}
 
     if is_preview_enabled():
+        app.logger.info('previewing is enabled...')
         preview = unfurl_post(request_data)
         if preview:
+            app.logger.info('generated preview')
             path_format = get_preview_path_format()
             preview_path = path_format.format(published=published_date,
                                               slug=slug)
+            app.logger.info(f'saving preview at {preview_path}')
             files[preview_path] = preview
+    else:
+        app.logger.info('previewing is disabled, not generating preview...')
 
     auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
     commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
@@ -176,7 +182,9 @@ def save_post(request_data):
 def unfurl_post(request_data):
     preview_url = get_preview_url(request_data)
     if not preview_url:
+        app.logger.info('did not find preview URL')
         return None
+    app.logger.info(f'found preview URL {preview_url}')
     return generate_preview(preview_url)
 
 
