@@ -1,6 +1,4 @@
 import json
-import requests
-import base64
 import datetime
 import copy
 import os
@@ -172,10 +170,7 @@ def save_post(request_data):
             files[preview_path] = preview
 
     auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
-    r = commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
-
-    if r.status_code != 201:
-        raise Exception(f'failed to post to github: {files}')
+    commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
 
 
 def unfurl_post(request_data):
