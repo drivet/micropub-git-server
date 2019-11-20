@@ -162,9 +162,7 @@ def save_post(request_data):
                                               slug=slug)
     files = {repo_path: json.dumps(request_data)}
 
-    pe = is_preview_enabled()
-    app.logger.info(f'PE: {pe}')
-    if pe:
+    if is_preview_enabled():
         app.logger.info('previewing is enabled...')
         preview = unfurl_post(request_data)
         if preview:
@@ -173,7 +171,7 @@ def save_post(request_data):
             preview_path = path_format.format(published=published_date,
                                               slug=slug)
             app.logger.info(f'saving preview at {preview_path}')
-            files[preview_path] = preview
+            files[preview_path] = json.dumps(preview)
     else:
         app.logger.info('previewing is disabled, not generating preview...')
 
@@ -217,7 +215,6 @@ def get_preview_url(post):
 
 
 def is_preview_enabled():
-    print('IPE: ' + os.environ['MICROPUB_PREVIEW_ENABLED'])
     return os.environ.get('MICROPUB_PREVIEW_ENABLED', '')
 
 
