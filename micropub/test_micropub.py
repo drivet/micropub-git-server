@@ -198,7 +198,7 @@ def test_saves_unfurled_url(commit_mock, generate_preview_mock):
     assert rv.status_code == 202
     files = {
         '/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"like-of": ["https://cool-uri.com/stuff.html"], "content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}',
-        'previews/2019/07/16/134523': unfurled_content
+        'previews/2019/07/16/134523': '"this_is_the_unfurled_url"'
     }
     commit_mock.assert_called_with('drivet/pelican-test-blog',
                                    ('dude', 'amazing_password'),
