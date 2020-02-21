@@ -252,5 +252,8 @@ def get_default_slug(props):
 
 
 def get_published_date(props):
-    return datetime.datetime.strptime(props['published'][0],
-                                      '%Y-%m-%dT%H:%M:%S.%f')
+    datestr = props['published'][0]
+    try:
+        return datetime.datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S.%f')
+    except ValueError:
+        return datetime.datetime.strptime(datestr, '%Y-%m-%dT%H:%M:%S-%f')
