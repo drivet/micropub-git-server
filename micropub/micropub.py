@@ -207,9 +207,13 @@ def get_preview_url(post):
     if 'repost-of' in props:
         return props['repost-of'][0]
 
-    links = extract_links(post['properties']['content'][0])
-    if links:
-        return links[0]
+    if 'bookmark-of' in props:
+        return props['bookmark-of'][0]
+
+    if 'content' in props:
+        links = extract_links(props['content'][0])
+        if links:
+            return links[0]
 
     return None
 
