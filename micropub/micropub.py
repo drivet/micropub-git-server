@@ -180,12 +180,16 @@ def save_post(request_data):
 
 
 def unfurl_post(request_data):
-    preview_url = get_preview_url(request_data)
-    if not preview_url:
-        app.logger.info('did not find preview URL')
+    try:
+        preview_url = get_preview_url(request_data)
+        if not preview_url:
+            app.logger.info('did not find preview URL')
+            return None
+        app.logger.info(f'found preview URL {preview_url}')
+        return generate_preview(preview_url)
+    except Exception as e:
+        app.logger.warn('Exception thrown while unfurling ' + str(e))
         return None
-    app.logger.info(f'found preview URL {preview_url}')
-    return generate_preview(preview_url)
 
 
 def generate_preview(url):
