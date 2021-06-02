@@ -44,7 +44,7 @@ rope==0.14.0
 six==1.12.0
 soupsieve==1.9.5
 toml==0.10.0
-urllib3==1.25.3
+urllib3==1.26.5
 webencodings==0.5.1
 Werkzeug==0.15.5
 yapf==0.28.0
