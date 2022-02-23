@@ -22,8 +22,7 @@ VERSION = '0.1.0'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'Flask', 'jsonschema', 'requests', 'Flask-IndieAuth', 'Pillow',
-    'indieweb-utils'
+    'Flask', 'jsonschema', 'requests', 'Flask-IndieAuth', 'Pillow', 'pyyaml'
 ]
 
 # What packages are optional?

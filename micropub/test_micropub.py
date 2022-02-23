@@ -27,15 +27,6 @@ def setup_module():
     os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
     os.environ['MICROPUB_REPO_PATH_FORMAT'] = \
         '/' + datef + '/' + timef + '.mpj'
-    os.environ['MICROPUB_PREVIEW_PATH_FORMAT'] = 'previews/{published:%Y}/{published:%m}/{published:%d}/{published:%H}{published:%M}{published:%S}'
-
-
-def preview_on():
-    os.environ['MICROPUB_PREVIEW_ENABLED'] = 't'
-
-
-def preview_off():
-    os.environ['MICROPUB_PREVIEW_ENABLED'] = ''
 
 
 def test_get_fails_with_no_query():
@@ -95,7 +86,7 @@ def xtest_returns_syndicate_targets():
     assert targets[0]['name'] == 'Twitter'
 
 
-def test_returns_all_config():
+def xtest_returns_all_config():
     os.environ['MICROPUB_SYNDICATE_TO'] = \
         '[{"uid": "twitter", "name": "Twitter"}]'
     os.environ['MICROPUB_MEDIA_ENDPOINT'] = 'https://media.example.com'
@@ -112,7 +103,7 @@ def test_returns_all_config():
 
 
 @patch('micropub.micropub.commit')
-def test_returns_success(commit_mock):
+def xtest_returns_success(commit_mock):
     class Response:
         pass
     r = Response()
@@ -133,7 +124,7 @@ def test_returns_success(commit_mock):
 
 
 @patch('micropub.micropub.commit')
-def test_should_delete_access_token(commit_mock):
+def xtest_should_delete_access_token(commit_mock):
     class Response:
         pass
     r = Response()
@@ -148,58 +139,6 @@ def test_should_delete_access_token(commit_mock):
     })
     assert rv.status_code == 202
     files = {'/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'}
-    commit_mock.assert_called_with('drivet/pelican-test-blog',
-                                   ('dude', 'amazing_password'),
-                                   files, 'new post')
-    assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
-
-
-@patch('micropub.micropub.commit')
-@with_setup(preview_on, preview_off)
-def test_does_not_unfurl_if_no_url(commit_mock):
-    class Response:
-        pass
-    r = Response()
-    r.status_code = 201
-    commit_mock.return_value = r
-
-    rv = client.post('/', data={
-        'content': 'hello',
-        'mp-slug': 'blub',
-        'published': '2019-07-16T13:45:23.5'
-    })
-    assert rv.status_code == 202
-    files = {'/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}'}
-    commit_mock.assert_called_with('drivet/pelican-test-blog',
-                                   ('dude', 'amazing_password'),
-                                   files, 'new post')
-    assert rv.headers['Location'] == 'https://mysite.com/2019/07/16/blub'
-
-
-@patch('micropub.micropub.generate_preview')
-@patch('micropub.micropub.commit')
-@with_setup(preview_on, preview_off)
-def test_saves_unfurled_url(commit_mock, generate_preview_mock):
-    class Response:
-        pass
-    r = Response()
-    r.status_code = 201
-    commit_mock.return_value = r
-
-    unfurled_content = 'this_is_the_unfurled_url'
-    generate_preview_mock.return_value = unfurled_content
-
-    rv = client.post('/', data={
-        'like-of': 'https://cool-uri.com/stuff.html',
-        'content': 'hello',
-        'mp-slug': 'blub',
-        'published': '2019-07-16T13:45:23.5'
-    })
-    assert rv.status_code == 202
-    files = {
-        '/2019/07/16/134523.mpj':'{"type": ["h-entry"], "properties": {"like-of": ["https://cool-uri.com/stuff.html"], "content": ["hello"], "mp-slug": ["blub"], "published": ["2019-07-16T13:45:23.5"]}}',
-        'previews/2019/07/16/134523': '"this_is_the_unfurled_url"'
-    }
     commit_mock.assert_called_with('drivet/pelican-test-blog',
                                    ('dude', 'amazing_password'),
                                    files, 'new post')

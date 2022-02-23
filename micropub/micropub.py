@@ -10,33 +10,11 @@ from flask import request
 from flask_indieauth import requires_indieauth
 from micropub.mf2schema import mf2schema
 from micropub.utils import disable_if_testing
-from indieweb_utils.notedown import extract_links
-from indieweb_utils.unfurl import PreviewGenerator
-from indieweb_utils.commit import commit
-
-
-FULL_CONFIG_TEMPLATE = '''{{
-    "syndicate-to": {syndicate_to},
-    "media-endpoint": "{media_endpoint}"
-}}
-'''
-
-
-SYNDICATE_CONFIG_TEMPLATE = '''{{
-    "syndicate-to": {syndicate_to}
-}}
-'''
-
-
-MEDIA_CONFIG_TEMPLATE = '''{{
-    "media-endpoint": "{media_endpoint}"
-}}
-'''
+from micropub.commit import commit
+from micropub.format import make_post
 
 
 micropub_bp = Blueprint('micropub_bp', __name__)
-
-preview_generator = None
 
 
 @micropub_bp.route('/', methods=['GET', 'POST'], strict_slashes=False)
@@ -62,26 +40,41 @@ def handle_root():
 
 def handle_query():
     q = request.args.get('q')
-    media_endpoint = os.environ.get('MICROPUB_MEDIA_ENDPOINT', None)
-    syndicate_to = os.environ.get('MICROPUB_SYNDICATE_TO', None)
-    if q == 'config':
-        if not media_endpoint and not syndicate_to:
-            return "{}"
-        elif media_endpoint and not syndicate_to:
-            return MEDIA_CONFIG_TEMPLATE.format(media_endpoint=media_endpoint)
-        elif not media_endpoint and syndicate_to:
-            return SYNDICATE_CONFIG_TEMPLATE.format(syndicate_to=syndicate_to)
-        else:
-            return FULL_CONFIG_TEMPLATE.format(media_endpoint=media_endpoint,
-                                               syndicate_to=syndicate_to)
-    elif q == 'syndicate-to':
-        if not syndicate_to:
-            return "[]"
-        else:
-            return SYNDICATE_CONFIG_TEMPLATE.format(syndicate_to=syndicate_to)
-    else:
+    supported_q = ['config', 'syndicate-to']
+
+    if q not in supported_q:
         app.logger.error(f'Unsupported q value: {q}')
         return Response(status=400)
+
+    result = {}
+        
+    if q == 'config':
+        media_endpoint = os.environ.get('MICROPUB_MEDIA_ENDPOINT', None)
+        if media_endpoint:
+            result['media-endpoint'] = media_endpoint
+
+    if q == 'config' or q == 'syndicate-to':    
+        syndicate_to = os.environ.get('MICROPUB_SYNDICATE_TO', None)
+        if syndicate_to:
+            result['syndicate-to'] = syndicate_to
+
+    return json.dumps(result)
+
+
+def handle_create():
+    request_data = extract_create_request(request.get_json(), request.form)
+    permalink = os.path.join(app.config['ME'], make_permalink(request_data))
+
+    # access token is passed along with the rest of the data,
+    # we don't want to save that
+    props = request_data['properties']
+    if 'access_token' in props:
+        del props['access_token']
+
+    save_post(request_data)
+    resp = Response(status=202)
+    resp.headers['Location'] = permalink
+    return resp
 
 
 def extract_create_request(json_data, form_data):
@@ -137,104 +130,24 @@ def fill_defaults(request_data):
         request_data['properties']['published'] = [date.isoformat()]
 
 
-def handle_create():
-    request_data = extract_create_request(request.get_json(), request.form)
-    permalink = os.path.join(app.config['ME'], make_permalink(request_data))
-
-    # access token is passed along with the rest of the data,
-    # we don't want to save that
-    props = request_data['properties']
-    if 'access_token' in props:
-        del props['access_token']
-
-    save_post(request_data)
-    resp = Response(status=202)
-    resp.headers['Location'] = permalink
-    return resp
-
-
 def save_post(request_data):
     app.logger.info('saving post...')
     props = request_data['properties']
     published_date = get_published_date(props)
     slug = get_slug(props)
+    result = make_post(request_data)
     repo_path = get_repo_path_format().format(published=published_date,
-                                              slug=slug)
-    files = {repo_path: json.dumps(request_data)}
-
-    if is_preview_enabled():
-        app.logger.info('previewing is enabled...')
-        preview = unfurl_post(request_data)
-        if preview:
-            app.logger.info('generated preview')
-            path_format = get_preview_path_format()
-            preview_path = path_format.format(published=published_date,
-                                              slug=slug)
-            app.logger.info(f'saving preview at {preview_path}')
-            files[preview_path] = json.dumps(preview)
-    else:
-        app.logger.info('previewing is disabled, not generating preview...')
-
+                                              slug=slug,
+                                              ext=result[1])
+    files = {repo_path: result[0]}
     auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
     commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
-
-
-def unfurl_post(request_data):
-    try:
-        preview_url = get_preview_url(request_data)
-        if not preview_url:
-            app.logger.info('did not find preview URL')
-            return None
-        app.logger.info(f'found preview URL {preview_url}')
-        return generate_preview(preview_url)
-    except Exception as e:
-        app.logger.warn('Exception thrown while unfurling ' + str(e))
-        return None
-
-
-def generate_preview(url):
-    global preview_generator
-    if not preview_generator:
-        preview_generator = PreviewGenerator()
-        preview_generator.initialize()
-    return preview_generator.preview(url)
-
-
-def get_preview_url(post):
-    props = post['properties']
-    if 'like-of' in props:
-        return props['like-of'][0]
-
-    if 'in-reply-to' in props:
-        return props['in-reply-to'][0]
-
-    if 'repost-of' in props:
-        return props['repost-of'][0]
-
-    if 'bookmark-of' in props:
-        return props['bookmark-of'][0]
-
-    if 'content' in props:
-        links = extract_links(props['content'][0])
-        if links:
-            return links[0]
-
-    return None
-
-
-def is_preview_enabled():
-    return os.environ.get('MICROPUB_PREVIEW_ENABLED', '')
-
-
-def get_preview_path_format():
-    default = '/previews/{published:%Y}/{published:%m}/{published:%d}/{slug}'
-    return os.environ.get('MICROPUB_PREVIEW_PATH_FORMAT', default)
 
 
 def get_repo_path_format():
     default = '/content/micropub/' + \
               '{published:%Y}/{published:%m}/{published:%d}/' + \
-              '{published:%H}{published:%M}{published:%S}.mp'
+              '{published:%H}{published:%M}{published:%S}.{ext}'
     return os.environ.get('MICROPUB_REPO_PATH_FORMAT', default)
 
 
