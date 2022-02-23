@@ -1,5 +1,4 @@
 import yaml
-from dateutil.parser import isoparse
 
 # default behaviour is to copy the properties as is to the front matter.
 # this will change that behaviour for certain fields
