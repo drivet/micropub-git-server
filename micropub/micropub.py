@@ -56,7 +56,7 @@ def handle_query():
     if q == 'config' or q == 'syndicate-to':    
         syndicate_to = os.environ.get('MICROPUB_SYNDICATE_TO', None)
         if syndicate_to:
-            result['syndicate-to'] = syndicate_to
+            result['syndicate-to'] = json.loads(syndicate_to)
 
     return json.dumps(result)
 
