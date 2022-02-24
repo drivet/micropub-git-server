@@ -141,7 +141,7 @@ def save_post(request_data):
                                               ext=result[1])
     files = {repo_path: result[0]}
     auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
-    commit(os.environ['GITHUB_REPO'], auth, files, 'new post')
+    commit(os.environ['GITHUB_REPO'], auth, files, 'new post', 'main')
 
 
 def get_repo_path_format():
