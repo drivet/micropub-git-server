@@ -1,4 +1,5 @@
 import yaml
+from datetime import datetime
 
 # default behaviour is to copy the properties as is to the front matter.
 # this will change that behaviour for certain fields
@@ -41,6 +42,10 @@ prop_transform = {
     }
 }
 
+def tziso(notz):
+    d = datetime.fromisoformat(notz)
+    return d.astimezone().replace(microsecond=0).isoformat()
+
 # returns two element array
 # - the post as a string
 # - the file extension (md or html)
@@ -67,6 +72,12 @@ def make_post(data):
     if not frontmatter:
         raise 'at least one data property needed in a post'
     
+    if 'date' in frontmatter:
+        frontmatter['date'] = tziso(frontmatter['date'])
+
+    if 'modified' in frontmatter:
+        frontmatter['modified'] = tziso(frontmatter['modified'])
+
     post_content = None
     post_type = 'md'
     if 'content' in properties and \
