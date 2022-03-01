@@ -1,5 +1,5 @@
 import yaml
-from datetime import datetime
+from dateutil.parser import parse
 
 # default behaviour is to copy the properties as is to the front matter.
 # this will change that behaviour for certain fields
@@ -43,7 +43,7 @@ prop_transform = {
 }
 
 def tziso(notz):
-    d = datetime.fromisoformat(notz)
+    d = parse(notz)
     return d.astimezone().replace(microsecond=0).isoformat()
 
 # returns two element array

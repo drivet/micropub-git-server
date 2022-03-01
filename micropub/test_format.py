@@ -16,7 +16,7 @@ def test_published_date():
         }
     }
     result = make_post(reqdata)
-    assertPost(result, 'md', "date: '2019-08-15T14:35:45+00:00'", 'hello')
+    assertPost(result, 'md', "date: '2019-08-15T10:35:45-04:00'", 'hello')
     
 
 def test_name_title():
