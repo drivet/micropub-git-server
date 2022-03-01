@@ -7,7 +7,7 @@ def assertPost(result, type, fm, content):
     #print(f"---\n{fm}\n---\n\n{content}")
     assert result[0] == f"---\n{fm}\n---\n\n{content}"
 
-def test_published_date():
+def xtest_published_date():
     reqdata = {
         'type': ['h-entry'],
         'properties': {
