@@ -43,7 +43,7 @@ def handle_post():
 
         save_image(file, image_folder, image_file)
         outfile = resize_image(image_folder, image_file)
-        location = os.path.join(os.environ['MICROPUB_MEDIA_ENDPOINT'], outfile)
+        location = os.path.join(os.environ['MICROPUB_MEDIA_LOCATION'], outfile)
         app.logger.info(f'Sending back location {location}')
 
         resp = Response(status=201)
