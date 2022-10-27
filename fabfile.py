@@ -11,7 +11,7 @@ else:
 os.environ['PORT'] = f'{port}'
 
 
-volume = '/home/dcr/mp-root'
+volume = 'mp-root'
 
 
 image = f'desmondrivet/micropub-git-server:{branch}'
