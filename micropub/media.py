@@ -87,7 +87,7 @@ def get_root():
 
 
 def get_upload_folder():
-    return get_root() + '/upload_folder'
+    return get_root()
 
 
 def ensure_folder(path):

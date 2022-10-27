@@ -10,10 +10,8 @@ else:
 
 os.environ['PORT'] = f'{port}'
 
-if branch == 'master':
-    volume = 'mp-root'
-else:
-    volume = 'mp-root-test'
+
+volume = '/home/dcr/mp-root'
 
 
 image = f'desmondrivet/micropub-git-server:{branch}'
