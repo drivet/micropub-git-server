@@ -17,10 +17,10 @@ IMAGE_SIZE = 1024
 media_bp = Blueprint('media_bp', __name__)
 
 
-@media_bp.route('/<path:imagepath>', methods=['GET'], strict_slashes=False)
-def handle_get(imagepath):
-    app.logger.info('Handling media GET with ' + imagepath)
-    return send_from_directory(get_upload_folder(), imagepath)
+#@media_bp.route('/<path:imagepath>', methods=['GET'], strict_slashes=False)
+#def handle_get(imagepath):
+#    app.logger.info('Handling media GET with ' + imagepath)
+#    return send_from_directory(get_upload_folder(), imagepath)
 
 
 @media_bp.route('/', methods=['POST'], strict_slashes=False)
