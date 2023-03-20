@@ -16,6 +16,10 @@ from micropub.format import make_post
 
 micropub_bp = Blueprint('micropub_bp', __name__)
 
+syndicate_to = [
+    {'name': 'Twitter', 'uid': "twitter"},
+    {'name': 'Mastodon', 'uid': 'mastodon'}
+]
 
 @micropub_bp.route('/', methods=['GET', 'POST'], strict_slashes=False)
 @disable_if_testing(requires_indieauth)
@@ -54,9 +58,7 @@ def handle_query():
             result['media-endpoint'] = media_endpoint
 
     if q == 'config' or q == 'syndicate-to':    
-        syndicate_to = os.environ.get('MICROPUB_SYNDICATE_TO', None)
-        if syndicate_to:
-            result['syndicate-to'] = json.loads(syndicate_to)
+        result['syndicate-to'] = syndicate_to
 
     return json.dumps(result)
 
