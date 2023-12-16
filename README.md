@@ -1,7 +1,8 @@
 # Micropub Listener for Git Repositories
 
 A small Flask application which listens for [micropub][0] create requests
-and commits the result in a git repository.
+and commits the result in a git repository, hopefully triggering a new build
+for static websites.
 
 This server will commit plain, minimally processed JSON files,
 representing micropub entries, into a configured location of your choice.
