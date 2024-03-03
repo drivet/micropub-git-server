@@ -65,7 +65,7 @@ jobs:
       env:
         GH_REPO: ${{secrets.GH_REPO}}
         GH_USERNAME: ${{secrets.GH_USERNAME}}
-        GH_SECRET: ${{secrets.GH_SECRET}}
+        GH_PASSWORD: ${{secrets.GH_PASSWORD}}
         ME: ${{secrets.ME}}
         TOKEN_ENDPOINT: ${{secrets.TOKEN_ENDPOINT}}
         MICROPUB_MEDIA_ENDPOINT:  ${{secrets.MICROPUB_MEDIA_ENDPOINT}}
@@ -76,8 +76,8 @@ jobs:
         port: ${{ secrets.SSH_PORT }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
-        envs: GH_REPO,GH_USERNAME,GH_SECRET,ME,TOKEN_ENDPOINT,MICROPUB_MEDIA_ENDPOINT,MICROPUB_REPO_PATH_FORMAT,MICROPUB_PERMALINK_FORMAT
+        envs: GH_REPO,GH_USERNAME,GH_PASSWORD,ME,TOKEN_ENDPOINT,MICROPUB_MEDIA_ENDPOINT,MICROPUB_REPO_PATH_FORMAT,MICROPUB_PERMALINK_FORMAT
         script: |
           docker pull desmondrivet/micropub-git-server:master
           docker stop micropub-git-server
-          docker run --name micropub-git-server -e GH_REPO -e GH_USERNAME -e GH_SECRET -e ME -e TOKEN_ENDPOINT -e MICROPUB_MEDIA_ENDPOINT -e MICROPUB_REPO_PATH_FORMAT -e MICROPUB_PERMALINK_FORMAT -p 3032:3031 -v mp-root:/data --rm -d desmondrivet/micropub-git-server:master
+          docker run --name micropub-git-server -e GH_REPO -e GH_USERNAME -e GH_PASSWORD -e ME -e TOKEN_ENDPOINT -e MICROPUB_MEDIA_ENDPOINT -e MICROPUB_REPO_PATH_FORMAT -e MICROPUB_PERMALINK_FORMAT -p 3032:3031 -v mp-root:/data --rm -d desmondrivet/micropub-git-server:master
