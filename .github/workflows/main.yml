@@ -80,4 +80,4 @@ jobs:
         script: |
           docker pull desmondrivet/micropub-git-server:master
           docker stop micropub-git-server
-          docker run --name micropub-git-server -p 3032:3031 -v mp-root:/data --rm -d desmondrivet/micropub-git-server:master
+          docker run --name micropub-git-server -e GH_REPO -e GH_USERNAME -e GH_SECRET -e ME -e TOKEN_ENDPOINT -e MICROPUB_MEDIA_ENDPOINT -e MICROPUB_REPO_PATH_FORMAT -e MICROPUB_PERMALINK_FORMAT -p 3032:3031 -v mp-root:/data --rm -d desmondrivet/micropub-git-server:master
