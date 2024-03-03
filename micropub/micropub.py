@@ -26,7 +26,7 @@ from micropub.format import make_post
 #  
 # MICROPUB_MEDIA_ENDPOINT - the endpoint where you will upload media
 # MICROPUB_REPO_PATH_FORMAT - the format to use for the newly saved file paths.  In my case it's 
-# /src/posts/feed/{published:%Y}/{published:%Y}{published:%m}{published:%d}{published:%H}{published:%M}{published:%S}.{ext}
+#   src/posts/feed/{published:%Y}/{published:%Y}{published:%m}{published:%d}{published:%H}{published:%M}{published:%S}.{ext}
 
 micropub_bp = Blueprint('micropub_bp', __name__)
 
@@ -160,7 +160,7 @@ def save_post(request_data):
 
 
 def get_repo_path_format():
-    default = '/content/micropub/' + \
+    default = 'content/micropub/' + \
               '{published:%Y}/{published:%m}/{published:%d}/' + \
               '{published:%H}{published:%M}{published:%S}.{ext}'
     return os.environ.get('MICROPUB_REPO_PATH_FORMAT', default)
@@ -174,7 +174,7 @@ def make_permalink(request_data):
 
 
 def get_permalink_format():
-    default = '{published:%Y}/{published:%m}/{published:%d}/{slug}'
+    default = '/{published:%Y}/{published:%m}/{published:%d}/{slug}'
     return os.environ.get('MICROPUB_PERMALINK_FORMAT', default)
 
 
