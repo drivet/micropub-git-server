@@ -79,6 +79,7 @@ def handle_query():
 def handle_create():
     request_data = extract_create_request(request.get_json(), request.form)
     permalink = os.path.join(app.config['ME'], make_permalink(request_data))
+    app.logger.info('using permalink ' + permalink)
 
     # access token is passed along with the rest of the data,
     # we don't want to save that
