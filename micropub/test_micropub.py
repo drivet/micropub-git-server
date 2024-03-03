@@ -21,10 +21,10 @@ def setup_module():
     app.config['ME'] = 'https://mysite.com'
     datef = '{published:%Y}/{published:%m}/{published:%d}'
     timef = '{published:%H}{published:%M}{published:%S}'
-    os.environ['GITHUB_USERNAME'] = 'dude'
-    os.environ['GITHUB_PASSWORD'] = 'amazing_password'
+    os.environ['GH_USERNAME'] = 'dude'
+    os.environ['GH_PASSWORD'] = 'amazing_password'
     os.environ['MICROPUB_PERMALINK_FORMAT'] = datef + '/{slug}'
-    os.environ['GITHUB_REPO'] = 'drivet/pelican-test-blog'
+    os.environ['GH_REPO'] = 'drivet/pelican-test-blog'
     os.environ['MICROPUB_REPO_PATH_FORMAT'] = \
         '/' + datef + '/' + timef + '.mpj'
 

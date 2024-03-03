@@ -13,11 +13,24 @@ from micropub.utils import disable_if_testing
 from micropub.commit import commit
 from micropub.format import make_post
 
+# IndieAuth credentials:
+#
+# ME=https://desmondrivet.com
+# TOKEN_ENDPOINT=https://tokens.indieauth.com/token
+# 
+# Github information:
+# 
+# GH_REPO - the repository where you have your website, including the name or org.  In my case it's drivet/website-11ty
+# GH_USERNAME - username on github
+# GH_PASSWORD - the token you generate on Github
+#  
+# MICROPUB_MEDIA_ENDPOINT - the endpoint where you will upload media
+# MICROPUB_REPO_PATH_FORMAT - the format to use for the newly saved file paths.  In my case it's 
+# /src/posts/feed/{published:%Y}/{published:%Y}{published:%m}{published:%d}{published:%H}{published:%M}{published:%S}.{ext}
 
 micropub_bp = Blueprint('micropub_bp', __name__)
 
 syndicate_to = [
-    {'name': 'Twitter', 'uid': "twitter"},
     {'name': 'Mastodon', 'uid': 'mastodon'}
 ]
 
@@ -142,8 +155,8 @@ def save_post(request_data):
                                               slug=slug,
                                               ext=result[1])
     files = {repo_path: result[0]}
-    auth = (os.environ['GITHUB_USERNAME'], os.environ['GITHUB_PASSWORD'])
-    commit(os.environ['GITHUB_REPO'], auth, files, 'new post', 'main')
+    auth = (os.environ['GH_USERNAME'], os.environ['GH_PASSWORD'])
+    commit(os.environ['GH_REPO'], auth, files, 'new post', 'main')
 
 
 def get_repo_path_format():

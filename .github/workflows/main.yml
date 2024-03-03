@@ -54,3 +54,30 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy docker image
+    needs: push_to_registry
+    runs-on: ubuntu-latest
+    steps:
+    - name: remote deploy of docker image
+      uses: appleboy/ssh-action@v1.0.3
+      env:
+        GH_REPO: ${{secrets.GH_REPO}}
+        GH_USERNAME: ${{secrets.GH_USERNAME}}
+        GH_SECRET: ${{secrets.GH_SECRET}}
+        ME: ${{secrets.ME}}
+        TOKEN_ENDPOINT: ${{secrets.TOKEN_ENDPOINT}}
+        MICROPUB_MEDIA_ENDPOINT:  ${{secrets.MICROPUB_MEDIA_ENDPOINT}}
+        MICROPUB_REPO_PATH_FORMAT:  ${{secrets.MICROPUB_REPO_PATH_FORMAT}}
+        MICROPUB_PERMALINK_FORMAT: ${{secrets.MICROPUB_PERMALINK_FORMAT}}
+      with:
+        host: ${{ secrets.PROD_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        envs: GH_REPO,GH_USERNAME,GH_SECRET,ME,TOKEN_ENDPOINT,MICROPUB_MEDIA_ENDPOINT,MICROPUB_REPO_PATH_FORMAT,MICROPUB_PERMALINK_FORMAT
+        script: |
+          docker pull desmondrivet/micropub-git-server:main
+          docker stop micropub-git-server
+          docker run --name micropub-git-server -p 3032:3031 -v mp-root:/data --rm -d desmondrivet/micropub-git-server:main
