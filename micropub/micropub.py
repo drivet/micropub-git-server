@@ -175,7 +175,7 @@ def make_permalink(request_data):
 
 
 def get_permalink_format():
-    default = '/{published:%Y}/{published:%m}/{published:%d}/{slug}'
+    default = '{published:%Y}/{published:%m}/{published:%d}/{slug}'
     return os.environ.get('MICROPUB_PERMALINK_FORMAT', default)
 
 
