@@ -78,6 +78,14 @@ def make_post(data):
     if 'modified' in frontmatter:
         frontmatter['modified'] = tziso(frontmatter['modified'])
 
+    if 'tags' in frontmatter:
+        pruned_tags = [t for t in frontmatter['tags'] if t]
+        if pruned_tags:
+            frontmatter['tags'] = pruned_tags
+        else:
+            del frontmatter['tags']
+
+
     post_content = None
     post_type = 'md'
     if 'content' in properties and \

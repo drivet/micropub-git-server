@@ -55,3 +55,15 @@ def test_category():
     result = make_post(reqdata)
     assertPost(result, 'md', "tags:\n- tag1\n- tag2", 'hello')
  
+def test_blank_category():
+    reqdata = {
+        'type': ['h-entry'],
+        'properties': {
+            'name': ['this is a title'],
+            'content': ['hello'],
+            'category': ['']
+        }
+    }
+    result = make_post(reqdata)
+    assertPost(result, 'md', "title: this is a title", 'hello')
+ 
